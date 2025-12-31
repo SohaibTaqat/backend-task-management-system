@@ -99,6 +99,7 @@ class UserController extends Controller
      * Delete a user
      *
      * Deletes a user and all their associated tasks. Admin only.
+     * Admins cannot delete their own account.
      *
      * @authenticated
      *
@@ -109,13 +110,21 @@ class UserController extends Controller
      *   "message": "User deleted successfully",
      *   "data": null
      * }
+     * @response 400 {
+     *   "success": false,
+     *   "message": "You cannot delete your own account"
+     * }
      * @response 403 {
      *   "success": false,
      *   "message": "Unauthorized. Admin access required."
      * }
      */
-    public function destroy(User $user): JsonResponse
+    public function destroy(Request $request, User $user): JsonResponse
     {
+        if ($request->user()->id === $user->id) {
+            return $this->errorResponse('You cannot delete your own account', null, 400);
+        }
+
         $user->delete();
 
         return $this->successResponse(null, 'User deleted successfully');

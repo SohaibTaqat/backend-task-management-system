@@ -138,4 +138,19 @@ class UserTest extends TestCase
                 ],
             ]);
     }
+
+    public function test_admin_cannot_delete_themselves(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $response = $this->actingAs($admin)->deleteJson("/api/users/{$admin->id}");
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'success' => false,
+                'message' => 'You cannot delete your own account',
+            ]);
+
+        $this->assertDatabaseHas('users', ['id' => $admin->id]);
+    }
 }
