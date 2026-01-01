@@ -10,6 +10,12 @@ fi
 
 chmod -R ugo+rw /.composer
 
+# Auto-install composer dependencies if vendor doesn't exist (fresh clone)
+if [ ! -d /var/www/html/vendor ]; then
+    echo "Vendor directory not found. Running composer install..."
+    cd /var/www/html && composer install --no-interaction
+fi
+
 if [ $# -gt 0 ]; then
     exec gosu $WWWUSER "$@"
 else
